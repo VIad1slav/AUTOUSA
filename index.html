@@ -347,9 +347,9 @@ footer{
     <li><a href="#contact" data-k="ncont">Kontakt</a></li>
   </ul>
   <div class="langs">
-    <button class="lang on" onclick="L('pl')">PL</button>
-    <button class="lang" onclick="L('en')">EN</button>
-    <button class="lang" onclick="L('ru')">RU</button>
+    <button class="lang on" onclick="setLang('pl')">PL</button>
+    <button class="lang" onclick="setLang('en')">EN</button>
+    <button class="lang" onclick="setLang('ru')">RU</button>
   </div>
 </nav>
 
@@ -641,9 +641,9 @@ ru:{
 }
 };
 
-function L(lang){
+function setLang(lang){
   document.querySelectorAll('.lang').forEach(b=>b.classList.remove('on'));
-  document.querySelector(`.lang[onclick="L('${lang}')"]`).classList.add('on');
+  document.querySelector(`.lang[onclick="setLang('${lang}')"]`).classList.add('on');
   const t=T[lang];
   document.querySelectorAll('[data-k]').forEach(el=>{
     const k=el.getAttribute('data-k');
@@ -760,15 +760,13 @@ function renderReviews(lang){
 }
 
 // Patch L() to also re-render FAQ and reviews
-const _origL=L;
 function L(lang){
-  _origL(lang);
+  setLang(lang);
   renderFAQ(lang);
   renderReviews(lang);
 }
 
-renderFAQ('pl');
-renderReviews('pl');
+L('pl');
 
 window.addEventListener('scroll',()=>{
   document.getElementById('topnav').style.background=
