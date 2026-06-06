@@ -446,19 +446,19 @@ footer{
     </div>
     <form class="iform fu" onsubmit="sendForm(event)">
       <div class="frow">
-        <div class="fg"><label data-k="fl1">Imię i nazwisko</label><input type="text" data-kp="fp1" placeholder="Jan Kowalski" required></div>
-        <div class="fg"><label data-k="fl2">Telefon</label><input type="tel" data-kp="fp2" placeholder="+48 123 456 789" required></div>
+        <div class="fg"><label data-k="fl1">Imię i nazwisko</label><input type="text" name="name" data-kp="fp1" placeholder="Jan Kowalski" required></div>
+        <div class="fg"><label data-k="fl2">Telefon</label><input type="tel" name="phone" data-kp="fp2" placeholder="+48 123 456 789" required></div>
       </div>
-      <div class="fg"><label data-k="fl3">Email</label><input type="email" data-kp="fp3" placeholder="vl.gursk@gmail.com" required></div>
+      <div class="fg"><label data-k="fl3">Email</label><input type="email" name="email" data-kp="fp3" placeholder="vl.gursk@gmail.com" required></div>
       <div class="frow">
-        <div class="fg"><label data-k="fl4">Marka auta</label><input type="text" data-kp="fp4" placeholder="Ford, BMW, Tesla..."></div>
-        <div class="fg"><label data-k="fl5">Model</label><input type="text" data-kp="fp5" placeholder="Mustang, X5..."></div>
+        <div class="fg"><label data-k="fl4">Marka auta</label><input type="text" name="make" data-kp="fp4" placeholder="Ford, BMW, Tesla..."></div>
+        <div class="fg"><label data-k="fl5">Model</label><input type="text" name="model" data-kp="fp5" placeholder="Mustang, X5..."></div>
       </div>
       <div class="frow">
-        <div class="fg"><label data-k="fl6">Rok (od–do)</label><input type="text" data-kp="fp6" placeholder="2019–2023"></div>
+        <div class="fg"><label data-k="fl6">Rok (od–do)</label><input type="text" name="year" data-kp="fp6" placeholder="2019–2023"></div>
         <div class="fg">
           <label data-k="fl7">Budżet (PLN)</label>
-          <select>
+          <select name="budget">
             <option value="" data-k="fsel">Wybierz zakres</option>
             <option>do 50 000 PLN</option>
             <option>50 000 – 100 000 PLN</option>
@@ -658,22 +658,37 @@ function setLang(lang){
   });
 }
 
-function sendForm(e){
+async function sendForm(e){
   e.preventDefault();
   const f=e.target;
-  const fields=f.querySelectorAll('input,select,textarea');
-  let body='Nowe zapytanie z AutoUSA:\n\n';
-  fields.forEach(el=>{
-    if(el.value) body+=el.placeholder+':\n'+el.value+'\n\n';
-  });
-  const subject=encodeURIComponent('Nowe zapytanie — AutoUSA Import');
-  const bodyEnc=encodeURIComponent(body);
-  window.location.href='mailto:vl.gursk@gmail.com?subject='+subject+'&body='+bodyEnc;
   const btn=f.querySelector('.fsub');
   const ok=document.getElementById('ok');
-  btn.style.display='none';
-  ok.style.display='block';
-  setTimeout(()=>{btn.style.display='';ok.style.display='none';f.reset();},4200);
+  btn.textContent='Wysyłanie...';
+  btn.style.opacity='0.7';
+  btn.disabled=true;
+  try{
+    const res=await fetch('https://formspree.io/f/mykaezlv',{
+      method:'POST',
+      body:new FormData(f),
+      headers:{Accept:'application/json'}
+    });
+    if(res.ok){
+      btn.style.display='none';
+      ok.style.display='block';
+      f.reset();
+      setTimeout(()=>{btn.style.display='';ok.style.display='none';btn.style.display='';btn.style.opacity='1';btn.disabled=false;},4200);
+    } else {
+      btn.textContent='Błąd. Spróbuj ponownie.';
+      btn.style.opacity='1';
+      btn.disabled=false;
+      setTimeout(()=>{btn.textContent='';btn.style.opacity='1';},3000);
+    }
+  }catch(err){
+    btn.textContent='Błąd połączenia.';
+    btn.style.opacity='1';
+    btn.disabled=false;
+    setTimeout(()=>{btn.textContent='';},3000);
+  }
 }
 
 const obs=new IntersectionObserver(entries=>{
